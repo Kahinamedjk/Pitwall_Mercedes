@@ -1,0 +1,22 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# PHP
+vendor/
+
+# Assets (large files)
+res/*.glb
+res/*.gltf
+
+# Config with secrets
+config.php

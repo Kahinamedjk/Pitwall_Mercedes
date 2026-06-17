@@ -1,0 +1,20 @@
+<!-- ================= CHATBOT UI ================= -->
+<!-- Include this file on pages where the chatbot should appear -->
+
+<!-- Bouton flottant du chatbot -->
+<button class="chatbot-toggle" id="chatbot-toggle" aria-label="Ouvrir le chatbot">💬</button>
+
+<!-- Fenêtre du chatbot -->
+<div class="chatbot-window" id="chatbot-window">
+    <div class="chatbot-header">
+        <h3>⚡ Assistant Mercedes</h3>
+        <button class="chatbot-close" id="chatbot-close">&times;</button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages"></div>
+    <div class="chatbot-input">
+        <input type="text" id="chatbot-input" placeholder="Posez votre question..." />
+        <button id="chatbot-send">➤</button>
+    </div>
+</div>
+
+<script src="assets/chatbot.js"></script>

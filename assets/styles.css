@@ -1,0 +1,892 @@
+:root {
+    --mercedes-black: #1a1a1a;
+    --mercedes-dark: #0d0d0d;
+    --mercedes-grey: #2b2b2b;
+    --mercedes-silver: #c8c9c7;
+    --petronas-teal: #00d2be;
+    --petronas-teal-dark: #009e8e;
+    --accent-text: #f5f5f5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, var(--mercedes-dark) 0%, var(--mercedes-black) 100%);
+    color: var(--accent-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+/* model-viewer en fond */
+model-viewer#bgModel {
+    position: fixed;
+    inset: 0; /* top:0; right:0; bottom:0; left:0; */
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none; /* désactivé par défaut pour laisser les interactions sur l'UI */
+    transform-origin: center;
+    opacity: 0.95;
+    background: linear-gradient(180deg, rgba(13,13,13,0.6), rgba(10,10,10,0.9));
+}
+
+/* Modèle en fond non-interactif : pointer-events désactivés pour que l'UI reste totalement utilisable */
+
+/* Marquer les éléments UI pour garder le z-index au-dessus du fond 3D */
+.ui-block {
+    /* Centre le bloc principal au milieu de la page (suffisamment d'espace pour la navbar) */
+    position: relative;
+    z-index: 2; /* au-dessus du modèle par défaut */
+    width: 90%;
+    margin: auto; /* centre horizontalement et absorbe l'espace vertical disponible dans un conteneur flex */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-height: calc(100vh - 160px); /* laisse de la place pour la navbar et un peu d'air */
+}
+
+
+header {
+    width: 100%;
+    text-align: center;
+    padding: 30px 0 10px 0;
+    border-bottom: 3px solid var(--petronas-teal);
+    margin-bottom: 30px;
+    position: relative;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent-text);
+}
+
+.pitwall-board {
+    width: 90%;
+    background: transparent; /* Fond transparent demandé */
+    /* Bordure transparente/atténuée pour conserver la lecture du contour */
+    border: 2px solid rgba(0,210,190,0.18);
+    border-radius: 16px;
+    padding: 40px;
+    /* Laisser une légère ombre pour contraste sur le modèle 3D */
+    box-shadow: 0 0 40px rgba(0, 210, 190, 0.10);
+    position: relative;
+    backdrop-filter: blur(6px); /* améliore lisibilité si supporté */
+    align-self: center;
+}
+
+.sensors-row {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.sensor-card {
+    flex: 1;
+    min-width: 150px;
+    min-height: 150px;
+    background: var(--mercedes-black);
+    border: 1px solid var(--petronas-teal-dark);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+}
+
+.sensor-card {
+    flex: 1 1 0;
+    min-width: 150px;
+    height: 200px;
+    box-sizing: border-box;
+    background: var(--mercedes-black);
+    border: 1px solid var(--petronas-teal-dark);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.sensor-card .unit {
+    font-size: 1rem;
+    color: #888;
+    margin-left: 4px;
+}
+
+/* Zone centrale : bouton + capteur de proximité */
+.test-zone {
+    /* Même largeur/hauteur que .sensor-card :
+       - flex:1 pour occuper une colonne identique
+       - min-width identique
+       - hauteur identique (200px)
+    */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex: 1 1 0; /* même comportement que .sensor-card */
+    min-width: 150px;
+    min-height: 200px; /* correspond à .sensor-card height */
+    height: 200px;
+    box-sizing: border-box;
+    padding: 0 12px;
+}
+
+/* Ne pas remplir toute la zone avec le bouton : garder le style pilule d'origine
+   mais centrer le bouton à l'intérieur d'une zone de la même taille que les cartes */
+.test-zone .test-button {
+    width: auto;
+    height: auto;
+    padding: 22px 70px; /* restaurer le padding d'origine pour garder l'apparence pilule */
+    border-radius: 50px;
+    max-width: 420px; /* évite un bouton trop large */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.test-button {
+    position: relative;
+    background: linear-gradient(90deg, var(--mercedes-black) 0%, var(--mercedes-grey) 100%);
+    border: 2px solid var(--petronas-teal);
+    color: var(--accent-text);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 22px 70px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6);
+}
+
+.test-button:hover {
+    background: var(--petronas-teal);
+    color: var(--mercedes-black);
+    transform: scale(1.05);
+}
+
+.test-button.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6); }
+    70%  { box-shadow: 0 0 0 25px rgba(0, 210, 190, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 210, 190, 0); }
+}
+
+/* Flèches courbes autour du bouton (comme sur le schéma) */
+.arrow-loop {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    height: 50px;
+    border: 3px solid var(--petronas-teal-dark);
+    border-bottom: none;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    opacity: 0.5;
+}
+
+/* Flèche verticale venant du capteur de proximité */
+.arrow-up {
+    margin-top: 25px;
+    font-size: 2rem;
+    color: var(--petronas-teal);
+    line-height: 1;
+}
+
+.proximity-status {
+    margin-top: 5px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: var(--mercedes-silver);
+}
+
+.proximity-status .status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: #555;
+    vertical-align: middle;
+}
+
+.proximity-status.detected .status-dot {
+    background: var(--petronas-teal);
+    box-shadow: 0 0 10px var(--petronas-teal);
+}
+
+footer {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: #777;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    align-self: center;
+}
+
+/* --- Styles de navbar.html --- */
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--mercedes-black);
+    padding: 15px 30px;
+    border-bottom: 4px solid var(--petronas-teal);
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+/* --- Logo --- */
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+
+.navbar-logo img {
+    height: 100px;
+    width: auto;
+}
+
+.navbar-logo .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+
+.navbar-logo .logo-text .petronas {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.navbar-logo .logo-text .team {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: #cccccc;
+    margin-top: 2px;
+}
+
+/* --- Liens de navigation --- */
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    justify-content: center;
+    margin: 0 30px;
+}
+
+.navbar-links a {
+    background: var(--petronas-teal);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 18px 50px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.navbar-links a:hover {
+    background: #ffffff;
+    color: var(--mercedes-black);
+    transform: translateY(-2px);
+}
+
+/* --- Icône profil --- */
+.navbar-profile {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--petronas-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.navbar-profile:hover {
+    background: var(--petronas-teal);
+}
+
+.navbar-profile svg {
+    width: 32px;
+    height: 32px;
+    fill: #ffffff;
+}
+
+.navbar-profile:hover svg {
+    fill: var(--mercedes-black);
+}
+
+.pitwall-board{
+    display: flex;
+    justify-content: center;
+}
+
+.connexion-button {
+    position: relative;
+    background: linear-gradient(90deg, var(--mercedes-black) 0%, var(--mercedes-grey) 100%);
+    border: 2px solid var(--petronas-teal);
+    color: var(--accent-text);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 22px 70px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6);
+}
+
+.inscription-button {
+    position: relative;
+    background: linear-gradient(90deg, var(--petronas-teal) 0%, var(--petronas-teal-dark) 100%);
+    border: 2px solid var(--petronas-teal);
+    color: var(--mercedes-black);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 22px 70px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6);
+}
+
+.connexion-button:hover{
+    background: var(--petronas-teal);
+    color: var(--mercedes-black);
+    transform: scale(1.05);
+}
+
+.inscription-button:hover{
+    background: linear-gradient(90deg, var(--mercedes-black) 0%, var(--mercedes-grey) 100%);
+    color: var(--accent-text);
+    transform: scale(1.05);
+}
+
+.auth-section {
+    width: 90%;
+    background: transparent;
+    border: 2px solid rgba(0,210,190,0.18);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 0 40px rgba(0, 210, 190, 0.10);
+    position: relative;
+    backdrop-filter: blur(6px);
+    align-self: center;
+}
+
+.connexion-form-button{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, var(--mercedes-black) 0%, var(--mercedes-grey) 100%);
+    border: 2px solid var(--petronas-teal);
+    color: var(--accent-text);
+    height: 50px;
+    width: 175px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6);
+}
+
+
+.connexion-form-button:hover{
+    background: var(--petronas-teal);
+    color: var(--mercedes-black);
+    transform: scale(1.05);
+}
+
+.inscription-form-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, var(--petronas-teal) 0%, var(--petronas-teal-dark) 100%);
+    border: 2px solid var(--petronas-teal);
+    color: var(--mercedes-black);
+    height: 50px;
+    width: 175px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 0 rgba(0, 210, 190, 0.6);
+}
+
+.inscription-form-button:hover{
+    background: linear-gradient(90deg, var(--mercedes-black) 0%, var(--mercedes-grey) 100%);
+    color: var(--accent-text);
+    transform: scale(1.05);
+}
+
+footer{
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+    margin-top: 20px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+    .navbar {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .navbar::before {
+        display: none;
+    }
+
+    .navbar-links {
+        order: 3;
+        width: 100%;
+        flex-wrap: wrap;
+        margin: 0;
+    }
+
+    .navbar-links a {
+        flex: 1;
+        padding: 14px 20px;
+    }
+    .circuit-card {
+        flex-direction: column;
+        align-items: flex-start;
+        }
+
+    .circuit-card img {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+/* --- Page Circuits --- */ 
+
+    .circuits-board {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 20px 0;
+    }
+
+    /* Chaque carte */
+    .circuit-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(0, 210, 190, 0.25);
+        border-radius: 14px;
+        padding: 20px 28px;
+        transition: border-color 0.25s ease, background 0.25s ease;
+        }
+
+    .circuit-card:hover {
+        background: rgba(0, 210, 190, 0.06);
+        border-color: rgba(0, 210, 190, 0.55);
+    }
+
+    /* Ligne résumée : aperçu + nom/pays + bouton */
+    .circuit-summary {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+    }
+
+    /* Image d'aperçu : taille fixe et uniforme pour toutes les cartes */
+    .circuit-summary img {
+        width: 260px;
+        height: 160px;
+        object-fit: cover;       
+        border-radius: 10px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 210, 190, 0.20);
+    }
+
+    /* Bloc de texte à droite de l'image */
+    .circuit-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+    }
+
+    /* Bouton pour déplier/replier la carte */
+    .expand-toggle {
+        background: transparent;
+        border: 1px solid rgba(0, 210, 190, 0.4);
+        color: var(--petronas-teal);
+        font-size: 1.2rem;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .expand-toggle:hover {
+        background: var(--petronas-teal);
+        color: var(--mercedes-black);
+        transform: translateY(2px);
+    }
+
+    /* Détails masqués par défaut */
+    .circuit-details {
+        display: none;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 210, 190, 0.15);
+        flex-direction: row;
+        align-items: center;
+        gap: 32px;
+    }
+
+    .circuit-card.expanded .circuit-details {
+        display: flex;
+    }
+
+    /* Colonne gauche : aperçu en taille réelle */
+    .circuit-full-img {
+        flex: 2;
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 210, 190, 0.20);
+    }
+
+    /* Colonne droite : statistiques */
+    .circuit-details .circuit-meta {
+        flex: 1;
+        padding-top: 0;
+        border-top: none;
+        gap: 18px;
+    }
+
+    .circuit-details .circuit-meta p {
+        font-size: 1.5rem;
+    }
+
+    .circuit-details .circuit-meta span.label {
+        font-size: 1.1rem;
+    }
+
+    .circuit-content h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #00d2be;          /* teal Petronas */
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .circuit-content p {
+        font-size: 1.1rem;
+        color: #c8c9c7;          /* silver Mercedes */
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Séparateur discret entre les infos */
+    .circuit-content .circuit-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(0, 210, 190, 0.15);
+    }
+
+    .circuit-content .circuit-meta p {
+        font-size: 1.05rem;
+    }
+
+    /* Label des stats (longueur, tours) */
+    .circuit-content .circuit-meta span.label {
+        color: #888;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-right: 4px;
+    }
+
+/* ================= CHATBOT ================= */
+
+/* Bouton flottant du chatbot */
+.chatbot-toggle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #00d2ff, #0088cc);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(0, 210, 255, 0.4);
+    transition: all 0.3s;
+    z-index: 1000;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 30px rgba(0, 210, 255, 0.6);
+}
+
+/* Fenêtre du chatbot */
+.chatbot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 380px;
+    height: 550px;
+    background: #1a1a2e;
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    border-radius: 20px;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.chatbot-window.active {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chatbot-header {
+    background: linear-gradient(45deg, #00d2ff, #0088cc);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header h3 {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.chatbot-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.chatbot-close:hover {
+    opacity: 1;
+}
+
+.chatbot-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chatbot-messages::-webkit-scrollbar { width: 5px; }
+.chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+.chatbot-messages::-webkit-scrollbar-thumb { background: #00d2ff; border-radius: 10px; }
+
+.message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user {
+    background: linear-gradient(45deg, #00d2ff, #0088cc);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+
+.message.bot {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ddd;
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+
+.chatbot-input {
+    display: flex;
+    padding: 15px;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.chatbot-input input:focus {
+    border-color: #00d2ff;
+}
+
+.chatbot-input input::placeholder {
+    color: #666;
+}
+
+.chatbot-input button {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(45deg, #00d2ff, #0088cc);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-input button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+}
+
+.chatbot-input button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ================= FAQ PAGE ================= */
+.faq-container {
+    max-width: 800px;
+    margin: 50px auto;
+}
+
+.faq-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.faq-item:hover { border-color: #00d2ff; }
+
+.faq-question {
+    padding: 20px 25px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #fff;
+    transition: background 0.3s;
+}
+
+.faq-question:hover { background: rgba(0, 210, 255, 0.05); }
+
+.faq-question .arrow {
+    transition: transform 0.3s;
+    color: #00d2ff;
+}
+
+.faq-item.active .faq-question .arrow { transform: rotate(180deg); }
+
+.faq-answer {
+    padding: 0 25px;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    color: #aaa;
+    line-height: 1.6;
+}
+
+.faq-item.active .faq-answer {
+    padding: 0 25px 20px;
+    max-height: 300px;
+}
+
+/* ================= RESPONSIVE CHATBOT ================= */
+@media (max-width: 768px) {
+    .chatbot-window {
+        width: 95%;
+        right: 2.5%;
+        bottom: 80px;
+        height: 500px;
+    }
+}
+ 

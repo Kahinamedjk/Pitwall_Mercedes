@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "functions": {
+    "*.php": {
+      "runtime": "vercel-php@0.7.1"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/res/(.*)",
+      "destination": "/res/$1"
+    },
+    {
+      "source": "/vendor/(.*)",
+      "destination": "/vendor/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1.php"
+    }
+  ],
+  "cleanUrls": true
+}
